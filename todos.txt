@@ -1,0 +1,7 @@
+[home_server]
+- Setup firewall
+- Setup DNS + router
+- Create virtual machines that get NATed
+
+[kubernetes_slaves]
+- Setup slave machines

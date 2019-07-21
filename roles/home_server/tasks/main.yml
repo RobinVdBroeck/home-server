@@ -1,0 +1,7 @@
+- name: Install desktop enviroment (XFCE)
+  apt:
+    name: ["xfce4", "slim"]
+
+- name: Install firefox
+  apt:
+    name: firefox

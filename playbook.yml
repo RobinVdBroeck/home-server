@@ -3,9 +3,6 @@
   become: yes
   roles:
     - base
-    - kubernetes_master
-#- host: slaves
-#  become: yes
-#  roles:
-#    - base
-#    - slave
+    - home_server
+    - kubernetes_base
+    - kubernetes_control

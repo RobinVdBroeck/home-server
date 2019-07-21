@@ -1,3 +1,0 @@
-- name: minikube_delete
-  become_user: robin
-  shell: minikube delete
