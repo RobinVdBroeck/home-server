@@ -1,0 +1,19 @@
+- name: Install aptitude
+  apt:
+    name: aptitude
+
+- name: Remove snapd
+  apt:
+    name: snapd
+    purge: yes
+    state: absent
+
+- name: Install usefull packages
+  apt:
+    name: ["git", "curl", "vim", "net-tools", "apt-transport-https", "htop"]
+
+- name: Update software
+  apt:
+    update_cache: yes
+    upgrade: dist
+    autoremove: yes

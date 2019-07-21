@@ -1,0 +1,11 @@
+---
+- hosts: home_server
+  become: yes
+  roles:
+    - base
+    - kubernetes_master
+#- host: slaves
+#  become: yes
+#  roles:
+#    - base
+#    - slave
