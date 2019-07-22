@@ -4,5 +4,3 @@
   roles:
     - base
     - home_server
-    - kubernetes_base
-    - kubernetes_control

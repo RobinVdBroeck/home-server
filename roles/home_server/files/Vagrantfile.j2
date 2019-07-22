@@ -1,0 +1,63 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+nodes = [
+  { :hostname => "k8s-control-vm",
+    :ip => '192.168.1.2',
+    :type => :control,
+    :cpu => {{ master['cpu']}},
+    :mem => {{ master['mem']}}, 
+  },
+  {% for i in range(num_nodes) %}
+    { :hostname => "k8s-node{{i}}-vm",
+      :ip => "192.168.1.{{ i + 3 }}",
+      :type => :node,
+      :cpu => {{ node['cpu'] }},
+      :mem => {{ node['mem'] }}
+    },
+  {% endfor %}
+]
+
+Vagrant.configure("2") do |config|
+  #config.vm.provider :libvirt do |libvirt|
+  #  libvirt.cpus = 2
+  #  libvirt.memory = 2048
+  #  libvirt.volume_cache = 'none'
+  #  libvirt.nested = true
+  #end
+ 
+
+  nodes.each do |node|
+    config.vm.define node[:hostname] do |nodeconfig|
+      nodeconfig.vm.box = "generic/ubuntu1804"
+      nodeconfig.vm.hostname = node[:hostname]
+      nodeconfig.vm.network "private_network", ip: node[:ip]
+      
+      if node[:type] == :control
+        # bridge network
+      end
+
+      # We need to install python first for ansible to work
+      nodeconfig.vm.provision "shell", inline: "apt-get install python3"
+
+      nodeconfig.vm.provision "ansible" do |ansible|
+        if node[:type] == :control
+          ansible.playbook = "/opt/ansible/control-playbook.yml"
+        else
+          ansible.playbook = "/opt/ansible/node-playbook.yml"
+        end
+
+        ansible.extra_vars = {
+          node_ip: node[:ip]
+        }
+      end
+
+      nodeconfig.vm.provider "virtualbox" do |v|
+        v.linked_clone = true
+        v.name = node[:hostname]
+        v.memory = node[:mem]
+        v.cpus = node[:cpu]
+      end
+    end
+  end
+end

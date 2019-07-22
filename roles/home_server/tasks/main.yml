@@ -5,3 +5,56 @@
 - name: Install firefox
   apt:
     name: firefox
+
+- name: Load configuration file
+  include_vars:
+    file: ../../../configuration.yml
+
+- name: Add ansible ppa
+  apt_repository:
+    repo: ppa:ansible/ansible
+    state: present
+
+- name: Install ansible
+  apt:
+    name: ansible=2.8.*
+    state: present
+
+- name: Create ansible folder
+  file:
+    name: /opt/ansible
+    owner: root
+    group: root
+    state: directory
+
+- name: Copy ansible files
+  copy:
+    src: ./files/ansible/
+    dest: /opt/ansible/
+    group: root
+    owner: root
+
+- name: Install vagrant and virtualbox
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+      - vagrant
+      - virtualbox
+
+- name: Make vagrant folder
+  file:
+    name: /opt/vagrant
+    owner: root
+    group: root
+    state: directory
+
+- name: Copy Vagrantfile
+  template:
+    src: ./files/Vagrantfile.j2
+    dest: /opt/vagrant/Vagrantfile
+    owner: root
+    group: root
+
+- name: Bring vm's up
+  shell: cd /opt/vagrant && vagrant up

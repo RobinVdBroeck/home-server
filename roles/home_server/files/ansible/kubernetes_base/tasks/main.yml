@@ -2,15 +2,15 @@
   shell: swapoff -a
 
 - name: Disable swapoff permanently
-  replace:
-    path: /etc/fstab
-    regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
-    replace: '#\1\2\3swap\4'
-    backup: yes
+  mount:
+    path: swap
+    fstype: swap
+    state: absent
 
 - name: Install packages for the docker repository
   apt:
     name: "{{ packages }}"
+    state: present
   vars:
     packages:
       - apt-transport-https
@@ -22,20 +22,31 @@
 - name: Add docker apt-key
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
 
 - name: Add docker repostitory
   apt_repository:
     filename: docker
     repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
+    state: present
 
 - name: Install docker
   apt:
     name: "{{ packages }}"
+    state: present
+    update_cache: yes
   vars:
     packages:
       - docker-ce
       - docker-ce-cli
       - containerd.io
+  notify:
+    - enable_docker
+
+- name: Add vagrant user to docker group
+  user:
+    name: vagrant
+    group: docker
 
 - name: Setup docker
   copy:
@@ -46,28 +57,40 @@
   notify:
     - restart_docker
 
-- name: Enable docker service
-  systemd:
-    name: docker
-    enabled: yes
-    state: started
-
 - name: Add google apt-key
   apt_key:
     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
 
 - name: Add kubernetes repository
   apt_repository:
     filename: kubernetes
     repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
 
 - name: Install kubernetes
   apt:
     name: "{{ packages }}"
+    state: present
+    update_cache: yes
   vars:
     packages:
       - kubeadm
       - kubelet
       - kubectl
+
+- name: Create kubelet config file
+  file:
+    path: /etc/default/kubelet
+    group: root
+    owner: root
+    state: touch
+
+- name: Configure kubelet ip
+  lineinfile:
+    path: /etc/default/kubelet
+    line: KUBELET_EXTRA_ARGS=--node-ip={{ node_ip }}
+  notify:
+    - restart_kubelet
 
 - meta: flush_handlers

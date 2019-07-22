@@ -1,0 +1,32 @@
+- name: Init control plane
+  command: kubeadm init \
+    --apiserver-advertise-address={{ node_ip }} \
+    --apiserver-cert-extra-sans={{node_ip}} \
+    --pod-network-cidr=192.168.0.0/16
+
+- name: Create kube directory for vagrant user
+  file:
+    name: /home/vagrant/.kube
+    owner: vagrant
+    group: vagrant
+    state: directory
+
+- name: Enable vagrant user kubectl access
+  copy:
+    remote_src: yes
+    src: /etc/kubernetes/admin.conf
+    dest: /home/vagrant/.kube/config
+    owner: vagrant
+    group: vagrant
+    mode: preserve
+
+- name: Install calico pod network
+  become: false
+  command: kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
+
+- name: Generate join command
+  command: kubeadm token create --print-join-command
+  register: join_command
+
+- name: Copy join command to local file
+  local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="./join-command"

@@ -10,7 +10,16 @@
 
 - name: Install usefull packages
   apt:
-    name: ["git", "curl", "vim", "net-tools", "apt-transport-https", "htop"]
+    name: "{{ packages }}"
+  vars:
+    packages:
+      - git
+      - curl
+      - vim
+      - net-tools
+      - apt-transport-https
+      - htop
+      - software-properties-common
 
 - name: Update software
   apt:

@@ -1,7 +1,6 @@
 [home_server]
+- Use libvirt instead of virtualbox
 - Setup firewall
-- Setup DNS + router
-- Create virtual machines that get NATed
 
-[kubernetes_slaves]
-- Setup slave machines
+[k8s_control]
+- Setup bridge network
