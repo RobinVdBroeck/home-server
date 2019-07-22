@@ -1,11 +1,14 @@
 - name: Disable swapoff
   shell: swapoff -a
 
-- name: Disable swapoff permanently
+- name: Remove swapfile from /etc/fstab
   mount:
-    path: swap
+    name: "{{ item }}"
     fstype: swap
     state: absent
+  with_items:
+    - swap
+    - none
 
 - name: Install packages for the docker repository
   apt:

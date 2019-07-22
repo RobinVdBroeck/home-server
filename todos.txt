@@ -4,3 +4,9 @@
 
 [k8s_control]
 - Setup bridge network
+- allow reprovision (currently errors that k8s is allready initialized)
+- mount disk for storage
+
+[k8s_node]
+- allow reprovision (currently errors that kubelet is allready initialized)
+- mount disk for storage
